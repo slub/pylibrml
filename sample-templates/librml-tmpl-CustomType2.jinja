@@ -1,0 +1,132 @@
+{
+  "template": "Group-Embargo",
+  "actions": [
+    {
+      "type": "displaymetadata",
+      "permission": true
+    },
+    {
+      "type": "index",
+      "permission": true
+    },
+    {
+      "type": "read",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+      ]
+    },
+    {
+      "type": "download",
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "print",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "reproduce",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "modify",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "reuse",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "distribute",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "publish",
+      "permission": true,
+      "restrictions": [
+        {
+          "type": "date",
+          "fromdate": "{{embargodate}}"
+        },
+        {
+           "type": "group",
+           "groups": [{% for group in groups %}"{{ group }}",{% endfor %}]
+         }
+       ]
+    },
+    {
+      "type": "archive",
+      "permission": true
+    },
+    {
+      "type": "move",
+      "permission": true
+    }
+  ]
+}

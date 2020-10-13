@@ -1,0 +1,22 @@
+{
+  "template": "Group-Embargo",
+  "readablename": "Embargo und Nutzergruppen",
+  "description": "Hier ist ein Datum und eine Nutzergruppe.",
+  "group": "zhser-templ-test",
+  "author": "tbaer",
+  "variables": [
+    {
+      "name": "embargodate",
+      "datatype": "date",
+      "readablename": "Embargo Ablauf",
+      "description": "Das Datum, zu dem das Embargo fällt"
+    },
+    {
+      "name": "groups",
+      "datatype": "list",
+      "readablename": "Zulässige Nutzergruppen",
+      "description": "Die Liste der zugelassenen Nutzergruppen",
+      "source": "usergroups"
+    }
+  ]
+}
