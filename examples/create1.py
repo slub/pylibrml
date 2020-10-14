@@ -62,3 +62,9 @@ if __name__ == '__main__':
 
     print('Output after added xml:')
     print(json.dumps(librml.to_dict(), indent=4))
+
+    # Load a LibRML from the JSON-String created above
+
+    librml_json_str = json.dumps(librml.to_dict())
+
+    LibRML.from_json()
