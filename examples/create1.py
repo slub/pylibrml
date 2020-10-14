@@ -1,4 +1,5 @@
 import json
+import xml.etree.ElementTree as ET
 from datetime import date
 
 from model.librml import LibRML, Action, ActionType, Restriction, RestrictionType
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     librml.actions.append(
         Action(
             type=ActionType.READ,
+            permission=True,
             restrictions=[
                 Restriction(
                     res_type=RestrictionType.DATE,
@@ -32,16 +34,31 @@ if __name__ == '__main__':
     print(json.dumps(librml.to_dict(), indent=4))
 
     # The same works with a json
-    download_restriction = {
+    download_restriction: str = json.dumps({
         "type": "download",
+        "permission": True,
         "restrictions": [
             {
                 "type": "date",
                 "fromdate": "2026-02-11"
             }
         ]
-    }
-    librml.actions.append(Action.from_dict(download_restriction))
+    })
+    action_from_json = Action.from_jsonstr(download_restriction)
+    librml.actions.append(action_from_json)
 
-    print('Output after a json:')
+    print('Output after added json:')
+    print(json.dumps(librml.to_dict(), indent=4))
+
+    # Same with a XML
+    print_restriction: str = '''
+        <action type="print" permission="true">
+            <restriction type="date" fromdate="2026-02-11" />
+        </action>
+        '''
+
+    action_from_xml = Action.from_xmlstr(print_restriction)
+    librml.actions.append((action_from_xml))
+
+    print('Output after added xml:')
     print(json.dumps(librml.to_dict(), indent=4))

@@ -6,7 +6,7 @@ from datetime import date
 from enum import Enum, unique
 from typing import List
 
-from common.errors import LibRMLNotValidError, TemplateNotValidError, ZHSerError
+from common.errors import LibRMLNotValidError, ZHSerError
 from model.names import SUBNET, GROUPS, PARTS, MINAGE, INSIDE, OUTSIDE, MACHINES, FROMDATE, TODATE, DURATION, COUNT, \
     SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, \
     PERMISSION, RESTRICTIONS, XACTION, TENANT, MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, XMACHINE, \
@@ -292,8 +292,10 @@ class Restriction:
             for machine in restriction_node.iterfind(XMACHINE):
                 self.machines.append(machine.text)
         if self.type == RestrictionType.DATE:
-            self.fromdate = date.fromisoformat(restriction_node.attrib.get(FROMDATE))
-            self.todate = date.fromisoformat(restriction_node.attrib.get(TODATE))
+            if restriction_node.attrib.get(FROMDATE):
+                self.fromdate = date.fromisoformat(restriction_node.attrib.get(FROMDATE))
+            if restriction_node.attrib.get(TODATE):
+                self.todate = date.fromisoformat(restriction_node.attrib.get(TODATE))
         if self.type == RestrictionType.DURATION:
             self.duration = int(restriction_node.attrib.get(DURATION))
         if self.type == RestrictionType.COUNT:
@@ -303,8 +305,8 @@ class Restriction:
         if self.type == RestrictionType.WATERMARK:
             self.watermarkvalue = restriction_node.attrib.get(WATERMARK)
         if self.type == RestrictionType.COMMERCIALUSE:
-            self.commercialuse = restriction_node.attrib.get(COMMERCIAL) == "true"
-            self.noncommercialuse = restriction_node.attrib.get(NONCOMMERCIAL) == "true"
+            self.commercialuse = restriction_node.attrib.get(COMMERCIAL) == 'true'
+            self.noncommercialuse = restriction_node.attrib.get(NONCOMMERCIAL) == 'true'
         if self.type == RestrictionType.QUALITY:
             self.maxbitrate = restriction_node.attrib.get(MAXBIT)
             self.maxresolution = restriction_node.attrib.get(MAXRES)
@@ -350,13 +352,22 @@ class Action:
 
     def from_dict(self, action):
         if PERMISSION in action:
-            self.permission = action[PERMISSION] == 'true'
+            self.permission = action[PERMISSION]
         if RESTRICTIONS in action:
             restrictions = action[RESTRICTIONS]
             for restriction in restrictions:
                 r = Restriction(RestrictionType.from_name(restriction[TYPE]))
                 r.from_dict(restriction)
                 self.restrictions.append(r)
+
+    @staticmethod
+    def from_jsonstr(actionjson: str):
+        d = json.loads(actionjson)
+        t = ActionType.from_name(d[TYPE])
+        p = d[PERMISSION]
+        action = Action(type=t, permission=p)
+        action.from_dict(d)
+        return action
 
     def from_xml(self, action_node):
         if PERMISSION in action_node.attrib:
@@ -368,6 +379,15 @@ class Action:
                 self.restrictions.append(r)
             else:
                 raise LibRMLNotValidError('Restriction inside Action has no attribute "{}".'.format(TYPE))
+
+    @staticmethod
+    def from_xmlstr(actionxml: str):
+        x = ET.fromstring(actionxml)
+        t = ActionType.from_name(x.attrib.get(TYPE))
+        p = x.attrib.get(PERMISSION) == 'true'
+        action = Action(type=t, permission=p)
+        action.from_xml(x)
+        return action
 
 
 class LibRML(object):
@@ -488,6 +508,7 @@ class LibRML(object):
             if action.type == type:
                 ret.append(action)
         return ret
+
 
 if __name__ == '__main__':
     pass
