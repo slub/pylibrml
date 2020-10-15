@@ -1,5 +1,4 @@
 import json
-import xml.etree.ElementTree as ET
 from datetime import date
 
 from model.librml import LibRML, Action, ActionType, Restriction, RestrictionType
@@ -67,4 +66,11 @@ if __name__ == '__main__':
 
     librml_json_str = json.dumps(librml.to_dict())
 
-    LibRML.from_json()
+    librm2 = LibRML.from_jsonstr(librml_json_str)
+
+    # Now, let's get some infos out of this LibRML
+
+    print('All actions: {}'.format(librml.allactionnames()))
+    print('Actions allowed:')
+
+    print(ActionType.fname('eat'))

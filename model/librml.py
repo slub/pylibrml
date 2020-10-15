@@ -64,11 +64,16 @@ class ActionType(Enum):
     MOVE = 14
 
     @classmethod
-    def from_name(cls, name):
-        for action_name, action in ActionType.__members__.items():
-            if action_name == name.upper():
-                return action
-        raise Exception('Not a member of ActionType: {}'.format(name))
+    def fname(cls, name):
+        try:
+            return [member for membername, member in cls.__members__.items()
+                    if member.name.lower() == name.lower()].pop()
+        except IndexError:
+            raise ValueError('ActionType has no member "{}"'.format(name))
+
+    @classmethod
+    def getnames(cls):
+        return [name.lower() for name, member in cls.__members__.items()]
 
 
 @unique
@@ -86,11 +91,16 @@ class RestrictionType(Enum):
     QUALITY = 11
 
     @classmethod
-    def from_name(cls, name):
-        for restriction_name, restriction in RestrictionType.__members__.items():
-            if restriction_name == name.upper():
-                return restriction
-        raise ZHSerError('Not a member of RestrictionType: {}'.format(name))
+    def fname(cls, name):
+        try:
+            return [member for membername, member in cls.__members__.items()
+                    if member.name.lower() == name.lower()].pop()
+        except IndexError:
+            raise ValueError('RestrictionType has no member "{}"'.format(name))
+
+    @classmethod
+    def getnames(cls):
+        return [name.lower() for name, member in cls.__members__.items()]
 
 
 class Restriction:
@@ -356,14 +366,14 @@ class Action:
         if RESTRICTIONS in action:
             restrictions = action[RESTRICTIONS]
             for restriction in restrictions:
-                r = Restriction(RestrictionType.from_name(restriction[TYPE]))
+                r = Restriction(RestrictionType.fname(restriction[TYPE]))
                 r.from_dict(restriction)
                 self.restrictions.append(r)
 
     @staticmethod
     def from_jsonstr(actionjson: str):
         d = json.loads(actionjson)
-        t = ActionType.from_name(d[TYPE])
+        t = ActionType.fname(d[TYPE])
         p = d[PERMISSION]
         action = Action(type=t, permission=p)
         action.from_dict(d)
@@ -374,7 +384,7 @@ class Action:
             self.permission = action_node.attrib.get(PERMISSION) == 'true'
         for restriction_node in action_node.iterfind(XRESTRICTION):
             if TYPE in restriction_node.attrib:
-                r = Restriction(RestrictionType.from_name(restriction_node.attrib.get(TYPE)))
+                r = Restriction(RestrictionType.fname(restriction_node.attrib.get(TYPE)))
                 r.from_xml(restriction_node)
                 self.restrictions.append(r)
             else:
@@ -383,7 +393,7 @@ class Action:
     @staticmethod
     def from_xmlstr(actionxml: str):
         x = ET.fromstring(actionxml)
-        t = ActionType.from_name(x.attrib.get(TYPE))
+        t = ActionType.fname(x.attrib.get(TYPE))
         p = x.attrib.get(PERMISSION) == 'true'
         action = Action(type=t, permission=p)
         action.from_xml(x)
@@ -450,6 +460,14 @@ class LibRML(object):
         data = json.loads(json_obj)
         self.from_dict(data)
 
+    @staticmethod
+    def from_jsonstr(librmljson: str):
+        librmldict = json.loads(librmljson)
+        id = librmldict[ID]
+        librml = LibRML(itemid=id)
+        librml.from_dict(librmldict)
+        return librml
+
     def from_dict(self, data):
         if ID in data:
             self.id = data[ID]
@@ -468,7 +486,7 @@ class LibRML(object):
         if ACTIONS in data:
             actions = data[ACTIONS]
             for action in actions:
-                a = Action(ActionType.from_name(action[TYPE]))
+                a = Action(ActionType.fname(action[TYPE]))
                 self.actions.append(a)
                 a.from_dict(action)
 
@@ -490,7 +508,7 @@ class LibRML(object):
                     self.template = ie.attrib.get(TEMPLATE)
                 for action_node in ie.iter(XACTION):
                     if TYPE in action_node.attrib:
-                        action = Action(type=ActionType.from_name(action_node.attrib.get(TYPE)))
+                        action = Action(type=ActionType.fname(action_node.attrib.get(TYPE)))
                         action.from_xml(action_node)
                         self.actions.append(action)
                     else:
@@ -502,12 +520,8 @@ class LibRML(object):
         else:
             raise LibRMLNotValidError('There is no root element named "{}". Go away!'.format(LIBRML))
 
-    def getActions(self, type):
-        ret = []
-        for action in self.actions:
-            if action.type == type:
-                ret.append(action)
-        return ret
+    def allactionnames(self):
+        return ActionType.getnames()
 
 
 if __name__ == '__main__':
