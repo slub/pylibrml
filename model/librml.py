@@ -10,7 +10,7 @@ from common.errors import LibRMLNotValidError, ZHSerError
 from model.names import SUBNET, GROUPS, PARTS, MINAGE, INSIDE, OUTSIDE, MACHINES, FROMDATE, TODATE, DURATION, COUNT, \
     SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, \
     PERMISSION, RESTRICTIONS, XACTION, TENANT, MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, XMACHINE, \
-    TEMPLATE
+    TEMPLATE, RELATEDIDS, RELATEDID
 
 logger = logging.getLogger(__name__)
 
@@ -401,9 +401,14 @@ class Action:
 
 
 class LibRML(object):
-    def __init__(self, itemid: str, tenant: str = None, mention: bool = False, sharealike: bool = False,
+    def __init__(self, itemid: str, relatedids: List[str] = None, tenant: str = None, mention: bool = False,
+                 sharealike: bool = False,
                  usageguide: str = None, template: str = None, actions: List[Action] = None):
         self.id = itemid
+        if relatedids is not None:
+            self.relatedids = relatedids
+        else:
+            self.relatedids = []
         self.tenant = tenant
         self.mention = mention
         self.sharealike = sharealike
@@ -416,7 +421,8 @@ class LibRML(object):
 
     def to_dict(self):
         output = {ID: self.id}
-
+        if len(self.relatedids) > 0:
+            output[RELATEDIDS] = self.relatedids
         if self.tenant:
             output[TENANT] = self.tenant
         if self.mention:
@@ -440,6 +446,9 @@ class LibRML(object):
         root.append(ET.Comment(' This XML is created using the libRML Python code '))
         item = ET.SubElement(root, ITEM, {ID: self.id})
 
+        if len(self.relatedids) > 0:
+            for rid in self.relatedids:
+                ET.SubElement(item, RELATEDID, {ID: rid})
         if self.tenant:
             item.set(TENANT, str(self.tenant))
         if self.mention:
@@ -473,6 +482,8 @@ class LibRML(object):
             self.id = data[ID]
         else:
             raise LibRMLNotValidError('JSON has no attribute {}!'.format(ID))
+        if RELATEDIDS in data:
+            self.relatedids = data[RELATEDIDS]
         if TENANT in data:
             self.tenant = data[TENANT]
         if MENTION in data:
@@ -490,27 +501,31 @@ class LibRML(object):
                 self.actions.append(a)
                 a.from_dict(action)
 
-    def from_xml(self, xml):
-        xml_tree = ET.ElementTree(ET.fromstring(xml))
+    @staticmethod
+    def from_xmlstr(xmlstr: str):
+        xml_tree = ET.ElementTree(ET.fromstring(xmlstr))
         root = xml_tree.getroot()
         if root.tag == LIBRML:
             ie = root.find(ITEM)
             if ie is not None and ID in ie.attrib and TENANT in ie.attrib:
-                self.id = ie.attrib.get(ID)
-                self.tenant = ie.attrib.get(TENANT)
+                librml = LibRML(itemid=ie.attrib.get(ID))
+                for rid_node in ie.iter(RELATEDID):
+                    if ID in rid_node.attrib:
+                        librml.relatedids.append(rid_node.attrib.get(ID))
+                librml.tenant = ie.attrib.get(TENANT)
                 if MENTION in ie.attrib:
-                    self.mention = ie.attrib.get(MENTION) == 'true'
+                    librml.mention = ie.attrib.get(MENTION) == 'true'
                 if SHARE in ie.attrib:
-                    self.sharealike = ie.attrib.get(SHARE) == 'true'
+                    librml.sharealike = ie.attrib.get(SHARE) == 'true'
                 if USAGEGUIDE in ie.attrib:
-                    self.usageguide = ie.attrib.get(USAGEGUIDE)
+                    librml.usageguide = ie.attrib.get(USAGEGUIDE)
                 if TEMPLATE in ie.attrib:
-                    self.template = ie.attrib.get(TEMPLATE)
+                    librml.template = ie.attrib.get(TEMPLATE)
                 for action_node in ie.iter(XACTION):
                     if TYPE in action_node.attrib:
                         action = Action(type=ActionType.fname(action_node.attrib.get(TYPE)))
                         action.from_xml(action_node)
-                        self.actions.append(action)
+                        librml.actions.append(action)
                     else:
                         raise LibRMLNotValidError('Action inside Item has no attribute "{}".'.format(TYPE))
             else:
@@ -519,6 +534,7 @@ class LibRML(object):
                         .format(ITEM, ITEM, ID, ITEM, TENANT))
         else:
             raise LibRMLNotValidError('There is no root element named "{}". Go away!'.format(LIBRML))
+        return librml
 
     def allactionnames(self):
         return ActionType.getnames()

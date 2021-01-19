@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from lxml import etree
 
 from model.librml import LibRML, Action, ActionType, Restriction, RestrictionType
 
@@ -9,6 +10,7 @@ if __name__ == '__main__':
     librml = LibRML(itemid=id)
 
     # set some attributes
+    librml.relatedids = ['A-id-123456', 'B-id-123456']
     librml.tenant = 'http://slub-dresden.de'
     librml.sharealike = True
     librml.mention = True
@@ -68,9 +70,15 @@ if __name__ == '__main__':
 
     librm2 = LibRML.from_jsonstr(librml_json_str)
 
-    # Now, let's get some infos out of this LibRML
+    # Output as XML
 
-    print('All actions: {}'.format(librml.allactionnames()))
-    print('Actions allowed:')
+    print('Output as XML:')
+    xml = etree.fromstring(librm2.to_xml().encode(encoding='utf-8'))
+    print(etree.tostring(xml, method="xml", pretty_print=True, xml_declaration=True).decode("utf-8"))
 
-    print(ActionType.fname('eat'))
+    # Input from XML
+
+    librml3 = LibRML.from_xmlstr(xmlstr=librm2.to_xml())
+
+    print('Output after reread from xml:')
+    print(json.dumps(librml3.to_dict(), indent=4))

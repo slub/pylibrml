@@ -1,10 +1,12 @@
-VERSION = '0.2'
+VERSION = '0.3'
 
 TYPE = 'type'
 LIBRML = 'libRML'
 ITEM = 'item'
 ID = 'id'
 
+RELATEDIDS = 'relatedids'
+RELATEDID = 'relatedid'
 ACTIONS = 'actions'
 RESTRICTIONS = 'restrictions'
 PERMISSION = 'permission'
