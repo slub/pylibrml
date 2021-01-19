@@ -6,7 +6,7 @@ from datetime import date
 from enum import Enum, unique
 from typing import List
 
-from common.errors import LibRMLNotValidError, ZHSerError
+from common.errors import LibRMLNotValidError
 from model.names import SUBNET, GROUPS, PARTS, MINAGE, INSIDE, OUTSIDE, MACHINES, FROMDATE, TODATE, DURATION, COUNT, \
     SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, \
     PERMISSION, RESTRICTIONS, XACTION, TENANT, MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, XMACHINE, \
@@ -323,15 +323,15 @@ class Restriction:
 
 
 class Action:
-    def __init__(self, type: ActionType, permission: bool = None, restrictions: List[Restriction] = None):
+    def __init__(self, actiontype: ActionType, permission: bool = None, restrictions: List[Restriction] = None):
         self.permission = permission
         if restrictions is not None:
             self.restrictions = restrictions
         else:
             self.restrictions = TypedList(Restriction)
 
-        if type in ActionType:
-            self.type = type
+        if actiontype in ActionType:
+            self.type = actiontype
         else:
             raise TypeError
 
@@ -375,7 +375,7 @@ class Action:
         d = json.loads(actionjson)
         t = ActionType.fname(d[TYPE])
         p = d[PERMISSION]
-        action = Action(type=t, permission=p)
+        action = Action(actiontype=t, permission=p)
         action.from_dict(d)
         return action
 
@@ -395,7 +395,7 @@ class Action:
         x = ET.fromstring(actionxml)
         t = ActionType.fname(x.attrib.get(TYPE))
         p = x.attrib.get(PERMISSION) == 'true'
-        action = Action(type=t, permission=p)
+        action = Action(actiontype=t, permission=p)
         action.from_xml(x)
         return action
 
@@ -472,8 +472,8 @@ class LibRML(object):
     @staticmethod
     def from_jsonstr(librmljson: str):
         librmldict = json.loads(librmljson)
-        id = librmldict[ID]
-        librml = LibRML(itemid=id)
+        itemid = librmldict[ID]
+        librml = LibRML(itemid=itemid)
         librml.from_dict(librmldict)
         return librml
 
@@ -523,15 +523,15 @@ class LibRML(object):
                     librml.template = ie.attrib.get(TEMPLATE)
                 for action_node in ie.iter(XACTION):
                     if TYPE in action_node.attrib:
-                        action = Action(type=ActionType.fname(action_node.attrib.get(TYPE)))
+                        action = Action(actiontype=ActionType.fname(action_node.attrib.get(TYPE)))
                         action.from_xml(action_node)
                         librml.actions.append(action)
                     else:
                         raise LibRMLNotValidError('Action inside Item has no attribute "{}".'.format(TYPE))
             else:
                 raise LibRMLNotValidError(
-                    'Can\'t find element "{}", or the {} has no "{}", or the {} has no "{}".'
-                        .format(ITEM, ITEM, ID, ITEM, TENANT))
+                    'Can\'t find element "{item}", or the {item} has no "{id}", or the {item} has no "{tenant}".'
+                        .format(item=ITEM, id=ID, tenant=TENANT))
         else:
             raise LibRMLNotValidError('There is no root element named "{}". Go away!'.format(LIBRML))
         return librml

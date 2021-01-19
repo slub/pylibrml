@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # Add a action and a restriction
     librml.actions.append(
         Action(
-            type=ActionType.READ,
+            actiontype=ActionType.READ,
             permission=True,
             restrictions=[
                 Restriction(
