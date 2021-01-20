@@ -10,7 +10,7 @@ from common.errors import LibRMLNotValidError
 from model.names import SUBNET, GROUPS, PARTS, MINAGE, INSIDE, OUTSIDE, MACHINES, FROMDATE, TODATE, DURATION, COUNT, \
     SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, \
     PERMISSION, RESTRICTIONS, XACTION, TENANT, MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, XMACHINE, \
-    TEMPLATE, RELATEDIDS, RELATEDID
+    TEMPLATE, RELATEDIDS, RELATEDID, COPYRIGHT
 
 logger = logging.getLogger(__name__)
 
@@ -401,9 +401,16 @@ class Action:
 
 
 class LibRML(object):
-    def __init__(self, itemid: str, relatedids: List[str] = None, tenant: str = None, mention: bool = False,
+    def __init__(self,
+                 itemid: str,
+                 relatedids: List[str] = None,
+                 tenant: str = None,
+                 mention: bool = False,
                  sharealike: bool = False,
-                 usageguide: str = None, template: str = None, actions: List[Action] = None):
+                 usageguide: str = None,
+                 template: str = None,
+                 copyright: bool = False,
+                 actions: List[Action] = None):
         self.id = itemid
         if relatedids is not None:
             self.relatedids = relatedids
@@ -414,6 +421,7 @@ class LibRML(object):
         self.sharealike = sharealike
         self.usageguide = usageguide
         self.template = template
+        self.copyright = copyright
         if actions is not None:
             self.actions = actions
         else:
@@ -433,6 +441,8 @@ class LibRML(object):
             output[USAGEGUIDE] = self.usageguide
         if self.template:
             output[TEMPLATE] = self.template
+        if self.copyright:
+            output[COPYRIGHT] = self.copyright
         if len(self.actions) > 0:
             astring = []
             for action in self.actions:
@@ -459,6 +469,8 @@ class LibRML(object):
             item.set(USAGEGUIDE, str(self.usageguide))
         if self.template:
             item.set(TEMPLATE, str(self.template))
+        if self.copyright:
+            item.set(COPYRIGHT, str(self.copyright).lower())
         if len(self.actions) > 0:
             for action in self.actions:
                 item.append(action.to_xml())
@@ -494,6 +506,8 @@ class LibRML(object):
             self.usageguide = data[USAGEGUIDE]
         if TEMPLATE in data:
             self.template = data[TEMPLATE]
+        if COPYRIGHT in data:
+            self.copyright = data[COPYRIGHT]
         if ACTIONS in data:
             actions = data[ACTIONS]
             for action in actions:
@@ -521,6 +535,8 @@ class LibRML(object):
                     librml.usageguide = ie.attrib.get(USAGEGUIDE)
                 if TEMPLATE in ie.attrib:
                     librml.template = ie.attrib.get(TEMPLATE)
+                if COPYRIGHT in ie.attrib:
+                    librml.copyright = ie.attrib.get(COPYRIGHT) == 'true'
                 for action_node in ie.iter(XACTION):
                     if TYPE in action_node.attrib:
                         action = Action(actiontype=ActionType.fname(action_node.attrib.get(TYPE)))

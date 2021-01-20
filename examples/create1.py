@@ -1,5 +1,6 @@
 import json
 from datetime import date
+
 from lxml import etree
 
 from model.librml import LibRML, Action, ActionType, Restriction, RestrictionType
@@ -14,6 +15,7 @@ if __name__ == '__main__':
     librml.tenant = 'http://slub-dresden.de'
     librml.sharealike = True
     librml.mention = True
+    librml.copyright = True
 
     print('Output after creation and setting some attributes:')
     print(json.dumps(librml.to_dict(), indent=4))

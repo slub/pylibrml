@@ -15,6 +15,7 @@ MENTION = 'mention'
 SHARE = 'sharealike'
 USAGEGUIDE = 'usageguide'
 TEMPLATE = 'template'
+COPYRIGHT = 'copyright'
 
 #XML
 XRESTRICTION = 'restriction'
