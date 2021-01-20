@@ -10,7 +10,7 @@ from common.errors import LibRMLNotValidError
 from model.names import SUBNET, GROUPS, PARTS, MINAGE, INSIDE, OUTSIDE, MACHINES, FROMDATE, TODATE, DURATION, COUNT, \
     SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, \
     PERMISSION, RESTRICTIONS, XACTION, TENANT, MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, XMACHINE, \
-    TEMPLATE, RELATEDIDS, RELATEDID, COPYRIGHT
+    TEMPLATE, RELATEDIDS, RELATEDID, COPYRIGHT, AGREEMENTREQ
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +89,7 @@ class RestrictionType(Enum):
     WATERMARK = 9
     COMMERCIALUSE = 10
     QUALITY = 11
+    AGREEMENT = 12
 
     @classmethod
     def fname(cls, name):
@@ -108,7 +109,8 @@ class Restriction:
                  minage: int = None, inside: str = None, outside: str = None, machines: List[str] = None,
                  fromdate: date = None, todate: date = None, duration: int = None, count: int = None,
                  sessions: int = None, watermarkvalue: str = None, commercialuse: bool = None,
-                 noncommercialuse: bool = None, maxresolution: int = None, maxbitrate: int = None):
+                 noncommercialuse: bool = None, maxresolution: int = None, maxbitrate: int = None,
+                 agreement_required: bool = False):
 
         if res_type in RestrictionType:
             self.type = res_type
@@ -132,6 +134,7 @@ class Restriction:
         self.noncommercialuse = noncommercialuse
         self.maxresolution = maxresolution
         self.maxbitrate = maxbitrate
+        self.agreement_required = agreement_required
 
     def to_dict(self):
         if self.type == RestrictionType.PARTS:
@@ -191,6 +194,11 @@ class Restriction:
                 out[MAXBIT] = int(self.maxbitrate)
             if self.maxresolution or self.maxbitrate:
                 return out
+        elif self.type == RestrictionType.AGREEMENT:
+            out = {TYPE: self.type.name.lower()}
+            if self.agreement_required:
+                out[AGREEMENTREQ] = True
+                return out
 
     def to_xml(self):
         x = ET.Element(XRESTRICTION, {TYPE: self.type.name.lower()})
@@ -244,6 +252,9 @@ class Restriction:
                 x.set(MAXBIT, str(self.maxbitrate))
             if self.maxresolution:
                 x.set(MAXRES, str(self.maxresolution))
+        elif self.type == RestrictionType.AGREEMENT:
+            if self.agreement_required:
+                x.set(AGREEMENTREQ, str(self.agreement_required).lower())
         else:
             return None
 
@@ -284,6 +295,8 @@ class Restriction:
             self.maxresolution = restriction[MAXRES]
         if MAXBIT in restriction:
             self.maxbitrate = restriction[MAXBIT]
+        if AGREEMENTREQ in restriction:
+            self.agreement_required = restriction[AGREEMENTREQ]
 
     def from_xml(self, restriction_node):
         if self.type == RestrictionType.PARTS:
@@ -320,6 +333,8 @@ class Restriction:
         if self.type == RestrictionType.QUALITY:
             self.maxbitrate = restriction_node.attrib.get(MAXBIT)
             self.maxresolution = restriction_node.attrib.get(MAXRES)
+        if self.type == RestrictionType.AGREEMENT:
+            self.agreement_required = restriction_node.attrib.get(AGREEMENTREQ) == 'true'
 
 
 class Action:

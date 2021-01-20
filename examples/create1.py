@@ -28,8 +28,27 @@ if __name__ == '__main__':
             restrictions=[
                 Restriction(
                     res_type=RestrictionType.DATE,
-                    fromdate=date(year=2026, month=2, day=11))
-            ],
+                    fromdate=date(year=2026, month=2, day=11)
+                ),
+            ]
+        )
+    )
+
+    # Add the same action again, but with a agreement
+    librml.actions.append(
+        Action(
+            actiontype=ActionType.READ,
+            permission=True,
+            restrictions=[
+                Restriction(
+                    res_type=RestrictionType.DATE,
+                    todate=date(year=2026, month=2, day=10)
+                ),
+                Restriction(
+                    res_type=RestrictionType.AGREEMENT,
+                    agreement_required=True
+                ),
+            ]
         )
     )
 

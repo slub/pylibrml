@@ -17,7 +17,7 @@ USAGEGUIDE = 'usageguide'
 TEMPLATE = 'template'
 COPYRIGHT = 'copyright'
 
-#XML
+# XML
 XRESTRICTION = 'restriction'
 XACTION = 'action'
 XPART = 'part'
@@ -43,3 +43,4 @@ COMMERCIAL = 'commercialuse'
 NONCOMMERCIAL = 'noncommercialuse'
 MAXRES = 'maxresolution'
 MAXBIT = 'maxbitrate'
+AGREEMENTREQ = 'required'
