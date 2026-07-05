@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pylibrml",
-    version="0.2.0.dev1",
+    version="0.3.0.dev1",
     author="Thomas Baer",
     author_email="thomas.baer@slub-dresden.de",
     description="Example implementation for LibRML",
