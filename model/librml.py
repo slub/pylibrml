@@ -6,10 +6,48 @@ from datetime import date
 from enum import Enum, unique
 
 from common.errors import LibRMLNotValidError
-from model.names import SUBNET, GROUPS, PERCENTAGE, MINAGE, MAXAGE, INSIDE, OUTSIDE, FROMDATE, TODATE, \
-    MAXDURATION, COUNT, SESSIONS, WATERMARK, COMMERCIAL, NONCOMMERCIAL, MAXRES, MAXBIT, MAXDIMENSION, \
-    AGREEMENTREQ, TYPE, XRESTRICTION, XPART, XGROUP, XSUBNET, PERMISSION, RESTRICTIONS, XACTION, TENANT, \
-    MENTION, SHARE, USAGEGUIDE, ACTIONS, LIBRML, ITEM, ID, VERSION, TEMPLATE, COPYRIGHT, RELATEDIDS, RELATEDID
+from model.names import (
+    SUBNET,
+    GROUPS,
+    PERCENTAGE,
+    MINAGE,
+    MAXAGE,
+    INSIDE,
+    OUTSIDE,
+    FROMDATE,
+    TODATE,
+    MAXDURATION,
+    COUNT,
+    SESSIONS,
+    WATERMARK,
+    COMMERCIAL,
+    NONCOMMERCIAL,
+    MAXRES,
+    MAXBIT,
+    MAXDIMENSION,
+    AGREEMENTREQ,
+    TYPE,
+    XRESTRICTION,
+    XPART,
+    XGROUP,
+    XSUBNET,
+    PERMISSION,
+    RESTRICTIONS,
+    XACTION,
+    TENANT,
+    MENTION,
+    SHARE,
+    USAGEGUIDE,
+    ACTIONS,
+    LIBRML,
+    ITEM,
+    ID,
+    VERSION,
+    TEMPLATE,
+    COPYRIGHT,
+    RELATEDIDS,
+    RELATEDID,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +103,11 @@ class ActionType(Enum):
     @classmethod
     def fname(cls, name):
         try:
-            return [member for membername, member in cls.__members__.items()
-                    if member.name.lower() == name.lower()].pop()
+            return [
+                member
+                for membername, member in cls.__members__.items()
+                if member.name.lower() == name.lower()
+            ].pop()
         except IndexError:
             raise ValueError('ActionType has no member "{}"'.format(name))
 
@@ -93,8 +134,11 @@ class RestrictionType(Enum):
     @classmethod
     def fname(cls, name):
         try:
-            return [member for membername, member in cls.__members__.items()
-                    if member.name.lower() == name.lower()].pop()
+            return [
+                member
+                for membername, member in cls.__members__.items()
+                if member.name.lower() == name.lower()
+            ].pop()
         except IndexError:
             raise ValueError('RestrictionType has no member "{}"'.format(name))
 
@@ -104,15 +148,29 @@ class RestrictionType(Enum):
 
 
 class Restriction:
-    def __init__(self, res_type: RestrictionType, subnet: list[str] | None = None, groups: list[str] | None = None,
-                 percentage: int | None = None, minage: int | None = None, maxage: int | None = None,
-                 inside: str | None = None, outside: str | None = None, 
-                 fromdate: date | None = None, todate: date | None = None, maxduration: int | None = None,
-                 count: int | None = None, sessions: int | None = None,
-                 watermarkvalue: str | None = None, commercialuse: bool | None = None,
-                 noncommercialuse: bool | None = None, maxresolution: int | None = None,
-                 maxbitrate: int | None = None, maxdimension: int | None = None,
-                 agreement_required: bool | None = None):
+    def __init__(
+        self,
+        res_type: RestrictionType,
+        subnet: list[str] | None = None,
+        groups: list[str] | None = None,
+        percentage: int | None = None,
+        minage: int | None = None,
+        maxage: int | None = None,
+        inside: str | None = None,
+        outside: str | None = None,
+        fromdate: date | None = None,
+        todate: date | None = None,
+        maxduration: int | None = None,
+        count: int | None = None,
+        sessions: int | None = None,
+        watermarkvalue: str | None = None,
+        commercialuse: bool | None = None,
+        noncommercialuse: bool | None = None,
+        maxresolution: int | None = None,
+        maxbitrate: int | None = None,
+        maxdimension: int | None = None,
+        agreement_required: bool | None = None,
+    ):
 
         if res_type in RestrictionType:
             self.type = res_type
@@ -174,7 +232,10 @@ class Restriction:
                 return out
         elif self.type == RestrictionType.DURATION:
             if self.maxduration:
-                return {TYPE: self.type.name.lower(), MAXDURATION: int(self.maxduration)}
+                return {
+                    TYPE: self.type.name.lower(),
+                    MAXDURATION: int(self.maxduration),
+                }
         elif self.type == RestrictionType.COUNT:
             if self.count:
                 return {TYPE: self.type.name.lower(), COUNT: int(self.count)}
@@ -204,7 +265,10 @@ class Restriction:
                 return out
         elif self.type == RestrictionType.AGREEMENT:
             if self.agreement_required is not None:
-                return {TYPE: self.type.name.lower(), AGREEMENTREQ: self.agreement_required}
+                return {
+                    TYPE: self.type.name.lower(),
+                    AGREEMENTREQ: self.agreement_required,
+                }
 
     def to_xml(self):
         x = ET.Element(XRESTRICTION, {TYPE: self.type.name.lower()})
@@ -330,7 +394,9 @@ class Restriction:
                 self.subnet.append(subnet.text)
         if self.type == RestrictionType.DATE:
             if restriction_node.attrib.get(FROMDATE):
-                self.fromdate = date.fromisoformat(restriction_node.attrib.get(FROMDATE))
+                self.fromdate = date.fromisoformat(
+                    restriction_node.attrib.get(FROMDATE)
+                )
             if restriction_node.attrib.get(TODATE):
                 self.todate = date.fromisoformat(restriction_node.attrib.get(TODATE))
         if self.type == RestrictionType.DURATION:
@@ -343,9 +409,11 @@ class Restriction:
             self.watermarkvalue = restriction_node.attrib.get(WATERMARK)
         if self.type == RestrictionType.COMMERCIALUSE:
             if restriction_node.attrib.get(COMMERCIAL):
-                self.commercialuse = restriction_node.attrib.get(COMMERCIAL) == 'true'
+                self.commercialuse = restriction_node.attrib.get(COMMERCIAL) == "true"
             if restriction_node.attrib.get(NONCOMMERCIAL):
-                self.noncommercialuse = restriction_node.attrib.get(NONCOMMERCIAL) == 'true'
+                self.noncommercialuse = (
+                    restriction_node.attrib.get(NONCOMMERCIAL) == "true"
+                )
         if self.type == RestrictionType.QUALITY:
             if restriction_node.attrib.get(MAXBIT):
                 self.maxbitrate = int(restriction_node.attrib.get(MAXBIT))
@@ -354,11 +422,18 @@ class Restriction:
             if restriction_node.attrib.get(MAXDIMENSION):
                 self.maxdimension = int(restriction_node.attrib.get(MAXDIMENSION))
         if self.type == RestrictionType.AGREEMENT:
-            self.agreement_required = restriction_node.attrib.get(AGREEMENTREQ) == 'true'
+            self.agreement_required = (
+                restriction_node.attrib.get(AGREEMENTREQ) == "true"
+            )
 
 
 class Action:
-    def __init__(self, actiontype: ActionType, permission: bool | None = None, restrictions: list[Restriction] | None = None):
+    def __init__(
+        self,
+        actiontype: ActionType,
+        permission: bool | None = None,
+        restrictions: list[Restriction] | None = None,
+    ):
         self.permission = permission
         if restrictions is not None:
             self.restrictions = restrictions
@@ -416,37 +491,43 @@ class Action:
 
     def from_xml(self, action_node):
         if PERMISSION in action_node.attrib:
-            self.permission = action_node.attrib.get(PERMISSION) == 'true'
+            self.permission = action_node.attrib.get(PERMISSION) == "true"
         for restriction_node in action_node.iterfind(XRESTRICTION):
             if TYPE in restriction_node.attrib:
-                r = Restriction(RestrictionType.fname(restriction_node.attrib.get(TYPE)))
+                r = Restriction(
+                    RestrictionType.fname(restriction_node.attrib.get(TYPE))
+                )
                 r.from_xml(restriction_node)
                 self.restrictions.append(r)
             else:
-                raise LibRMLNotValidError('Restriction inside Action has no attribute "{}".'.format(TYPE))
+                raise LibRMLNotValidError(
+                    'Restriction inside Action has no attribute "{}".'.format(TYPE)
+                )
 
     @staticmethod
     def from_xmlstr(actionxml: str):
         x = ET.fromstring(actionxml)
         t = ActionType.fname(x.attrib.get(TYPE))
-        p = x.attrib.get(PERMISSION) == 'true'
+        p = x.attrib.get(PERMISSION) == "true"
         action = Action(actiontype=t, permission=p)
         action.from_xml(x)
         return action
 
 
 class LibRML(object):
-    def __init__(self,
-                 itemid: str | None = None,
-                 relatedids: list[str] | None = None,
-                 tenant: str | None = None,
-                 mention: bool = False,
-                 sharealike: bool = False,
-                 commercialuse: bool = False,
-                 usageguide: str | None = None,
-                 template: str | None = None,
-                 copyright: bool = False,
-                 actions: list[Action] | None = None):
+    def __init__(
+        self,
+        itemid: str | None = None,
+        relatedids: list[str] | None = None,
+        tenant: str | None = None,
+        mention: bool = False,
+        sharealike: bool = False,
+        commercialuse: bool = False,
+        usageguide: str | None = None,
+        template: str | None = None,
+        copyright: bool = False,
+        actions: list[Action] | None = None,
+    ):
         self.id = itemid
         if relatedids is not None:
             self.relatedids = relatedids
@@ -491,8 +572,8 @@ class LibRML(object):
 
     def to_xml(self):
         root = ET.Element(LIBRML)
-        root.set('version', VERSION)
-        root.append(ET.Comment(' This XML is created using the libRML Python code '))
+        root.set("version", VERSION)
+        root.append(ET.Comment(" This XML is created using the libRML Python code "))
         item = ET.SubElement(root, ITEM, {ID: self.id})
 
         if len(self.relatedids) > 0:
@@ -516,7 +597,7 @@ class LibRML(object):
             for action in self.actions:
                 item.append(action.to_xml())
 
-        return ET.tostring(root, encoding='unicode', method='xml', xml_declaration=True)
+        return ET.tostring(root, encoding="unicode", method="xml", xml_declaration=True)
 
     def from_json(self, json_obj):
         data = json.loads(json_obj)
@@ -534,7 +615,7 @@ class LibRML(object):
         if ID in data:
             self.id = data[ID]
         else:
-            raise LibRMLNotValidError('JSON has no attribute {}!'.format(ID))
+            raise LibRMLNotValidError("JSON has no attribute {}!".format(ID))
         if RELATEDIDS in data:
             self.relatedids = data[RELATEDIDS]
         if TENANT in data:
@@ -565,38 +646,46 @@ class LibRML(object):
         if root.tag == LIBRML:
             ie = root.find(ITEM)
             if ie is not None and (ID in ie.attrib or TENANT in ie.attrib):
-                librml = LibRML(itemid=ie.attrib.get(ID, ''))
+                librml = LibRML(itemid=ie.attrib.get(ID, ""))
                 librml.tenant = ie.attrib.get(TENANT)
                 if MENTION in ie.attrib:
-                    librml.mention = ie.attrib.get(MENTION) == 'true'
+                    librml.mention = ie.attrib.get(MENTION) == "true"
                 if SHARE in ie.attrib:
-                    librml.sharealike = ie.attrib.get(SHARE) == 'true'
+                    librml.sharealike = ie.attrib.get(SHARE) == "true"
                 if USAGEGUIDE in ie.attrib:
                     librml.usageguide = ie.attrib.get(USAGEGUIDE)
                 if TEMPLATE in ie.attrib:
                     librml.template = ie.attrib.get(TEMPLATE)
                 if COPYRIGHT in ie.attrib:
-                    librml.copyright = ie.attrib.get(COPYRIGHT) == 'true'
+                    librml.copyright = ie.attrib.get(COPYRIGHT) == "true"
                 if COMMERCIAL in ie.attrib:
-                    librml.commercialuse = ie.attrib.get(COMMERCIAL) == 'true'
+                    librml.commercialuse = ie.attrib.get(COMMERCIAL) == "true"
                 for action_node in ie.iter(XACTION):
                     if TYPE in action_node.attrib:
-                        action = Action(actiontype=ActionType.fname(action_node.attrib.get(TYPE)))
+                        action = Action(
+                            actiontype=ActionType.fname(action_node.attrib.get(TYPE))
+                        )
                         action.from_xml(action_node)
                         librml.actions.append(action)
                     else:
-                        raise LibRMLNotValidError('Action inside Item has no attribute "{}".'.format(TYPE))
+                        raise LibRMLNotValidError(
+                            'Action inside Item has no attribute "{}".'.format(TYPE)
+                        )
             else:
                 raise LibRMLNotValidError(
-                    'Can\'t find element "{}", or the {} has no "{}" or "{}".'
-                        .format(ITEM, ITEM, ID, TENANT))
+                    'Can\'t find element "{}", or the {} has no "{}" or "{}".'.format(
+                        ITEM, ITEM, ID, TENANT
+                    )
+                )
         else:
-            raise LibRMLNotValidError('There is no root element named "{}". Go away!'.format(LIBRML))
+            raise LibRMLNotValidError(
+                'There is no root element named "{}". Go away!'.format(LIBRML)
+            )
         return librml
 
     def allactionnames(self):
         return ActionType.getnames()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
