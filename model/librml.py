@@ -520,12 +520,12 @@ class LibRML(object):
         itemid: str | None = None,
         relatedids: list[str] | None = None,
         tenant: str | None = None,
-        mention: bool = False,
-        sharealike: bool = False,
-        commercialuse: bool = False,
         usageguide: str | None = None,
         template: str | None = None,
-        copyright: bool = False,
+        copyright: bool = True,
+        commercialuse: bool | None = None,
+        mention: bool | None = None,
+        sharealike: bool | None = None,
         actions: list[Action] | None = None,
     ):
         self.id = itemid
@@ -546,23 +546,25 @@ class LibRML(object):
             self.actions = TypedList(Action)
 
     def to_dict(self):
-        output = {ID: self.id}
+        output = {}
+        if self.id:
+            output[ID] = self.id
         if len(self.relatedids) > 0:
             output[RELATEDIDS] = self.relatedids
         if self.tenant:
             output[TENANT] = self.tenant
-        if self.mention:
-            output[MENTION] = self.mention
-        if self.sharealike:
-            output[SHARE] = self.sharealike
         if self.usageguide:
             output[USAGEGUIDE] = self.usageguide
         if self.template:
             output[TEMPLATE] = self.template
-        if self.copyright:
+        if self.copyright is not None:
             output[COPYRIGHT] = self.copyright
         if self.commercialuse is not None:
             output[COMMERCIAL] = self.commercialuse
+        if self.mention is not None:
+            output[MENTION] = self.mention
+        if self.sharealike is not None:
+            output[SHARE] = self.sharealike
         if len(self.actions) > 0:
             astring = []
             for action in self.actions:
@@ -573,26 +575,28 @@ class LibRML(object):
     def to_xml(self):
         root = ET.Element(LIBRML)
         root.set("version", VERSION)
-        root.append(ET.Comment(" This XML is created using the libRML Python code "))
-        item = ET.SubElement(root, ITEM, {ID: self.id})
+        root.append(ET.Comment(" This XML was created using the libRML Python code "))
+        item = ET.SubElement(root, ITEM)
 
+        if self.id:
+            item.set(ID, str(self.id))
         if len(self.relatedids) > 0:
             for rid in self.relatedids:
                 ET.SubElement(item, RELATEDID, {ID: rid})
         if self.tenant:
             item.set(TENANT, str(self.tenant))
-        if self.mention:
-            item.set(MENTION, str(self.mention).lower())
-        if self.sharealike:
-            item.set(SHARE, str(self.sharealike).lower())
         if self.usageguide:
             item.set(USAGEGUIDE, str(self.usageguide))
         if self.template:
             item.set(TEMPLATE, str(self.template))
-        if self.copyright:
+        if self.copyright is not None:
             item.set(COPYRIGHT, str(self.copyright).lower())
         if self.commercialuse is not None:
             item.set(COMMERCIAL, str(self.commercialuse).lower())
+        if self.mention is not None:
+            item.set(MENTION, str(self.mention).lower())
+        if self.sharealike is not None:
+            item.set(SHARE, str(self.sharealike).lower())
         if len(self.actions) > 0:
             for action in self.actions:
                 item.append(action.to_xml())
