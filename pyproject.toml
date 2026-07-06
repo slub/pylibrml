@@ -4,39 +4,37 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pylibrml"
-version = "0.3.0.dev1"
+version = "0.3.0-alpha"
 authors = [
   { name="Thomas Baer", email="thomas.baer@slub-dresden.de" },
+  { name="Klaus Rettinghaus", email="klaus.rettinghaus@slub-dresden.de" },
 ]
-description = "Example implementation for LibRML"
+description = "Python implementation for LibRML"
 readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3.13",
     "Natural Language :: English",
     "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
     "jinja2",
-    "twine",
     "setuptools",
-    "wheel",
     "lxml",
 ]
 
 [tool.setuptools]
 packages = ["common", "model", "tmpl"]
-
-[tool.ruff]
-# Same as Black.
-line-length = 88
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
