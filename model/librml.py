@@ -231,11 +231,12 @@ class Restriction:
             if self.todate or self.fromdate:
                 return out
         elif self.type == RestrictionType.DURATION:
+            out = {TYPE: self.type.name.lower()}
             if self.maxduration:
-                return {
-                    TYPE: self.type.name.lower(),
-                    MAXDURATION: int(self.maxduration),
-                }
+                out[MAXDURATION] = int(self.maxduration)
+            if self.percentage:
+                out[PERCENTAGE] = int(self.percentage)
+            return out
         elif self.type == RestrictionType.COUNT:
             if self.count:
                 return {TYPE: self.type.name.lower(), COUNT: int(self.count)}
@@ -299,6 +300,8 @@ class Restriction:
         elif self.type == RestrictionType.DURATION:
             if self.maxduration:
                 x.set(MAXDURATION, str(self.maxduration))
+            if self.percentage:
+                x.set(PERCENTAGE, str(self.percentage))
         elif self.type == RestrictionType.COUNT:
             if self.count:
                 x.set(COUNT, str(self.count))
@@ -370,16 +373,16 @@ class Restriction:
 
     def from_xml(self, restriction_node):
         if self.type == RestrictionType.PARTS:
-            if restriction_node.attrib.get(PERCENTAGE):
-                self.percentage = int(restriction_node.attrib.get(PERCENTAGE))
+            if percentage := restriction_node.attrib.get(PERCENTAGE):
+                self.percentage = int(percentage)
         if self.type == RestrictionType.GROUP:
-            if restriction_node.attrib.get(GROUPS):
-                self.groups = restriction_node.attrib.get(GROUPS).split()
+            if groups := restriction_node.attrib.get(GROUPS):
+                self.groups = groups.split()
         if self.type == RestrictionType.AGE:
-            if restriction_node.attrib.get(MINAGE):
-                self.minage = int(restriction_node.attrib.get(MINAGE))
-            if restriction_node.attrib.get(MAXAGE):
-                self.maxage = int(restriction_node.attrib.get(MAXAGE))
+            if minage := restriction_node.attrib.get(MINAGE):
+                self.minage = int(minage)
+            if maxage := restriction_node.attrib.get(MAXAGE):
+                self.maxage = int(maxage)
         if self.type == RestrictionType.LOCATION:
             self.inside = restriction_node.attrib.get(INSIDE)
             self.outside = restriction_node.attrib.get(OUTSIDE)
@@ -392,11 +395,16 @@ class Restriction:
             if restriction_node.attrib.get(TODATE):
                 self.todate = date.fromisoformat(restriction_node.attrib.get(TODATE))
         if self.type == RestrictionType.DURATION:
-            self.maxduration = int(restriction_node.attrib.get(MAXDURATION))
+            if maxduration := restriction_node.attrib.get(MAXDURATION):
+                self.maxduration = int(maxduration)
+            if percentage := restriction_node.attrib.get(PERCENTAGE):
+                self.percentage = int(percentage)
         if self.type == RestrictionType.COUNT:
-            self.count = int(restriction_node.attrib.get(COUNT))
+            if count := restriction_node.attrib.get(COUNT):
+                self.count = int(count)
         if self.type == RestrictionType.CONCURRENT:
-            self.sessions = int(restriction_node.attrib.get(SESSIONS))
+            if sessions := restriction_node.attrib.get(SESSIONS):
+                self.sessions = int(sessions)
         if self.type == RestrictionType.WATERMARK:
             self.watermarkvalue = restriction_node.attrib.get(WATERMARK)
         if self.type == RestrictionType.COMMERCIALUSE:
