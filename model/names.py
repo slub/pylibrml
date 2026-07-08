@@ -18,10 +18,8 @@ TEMPLATE = "template"
 COPYRIGHT = "copyright"
 
 # XML
-XRESTRICTION = "restriction"
 XACTION = "action"
-XPART = "part"
-XGROUP = "group"
+XRESTRICTION = "restriction"
 XSUBNET = "subnet"
 
 # Fieldnames

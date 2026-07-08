@@ -28,8 +28,6 @@ from model.names import (
     AGREEMENTREQ,
     TYPE,
     XRESTRICTION,
-    XPART,
-    XGROUP,
     XSUBNET,
     PERMISSION,
     RESTRICTIONS,
@@ -276,13 +274,9 @@ class Restriction:
         if self.type == RestrictionType.PARTS:
             if self.percentage:
                 x.set(PERCENTAGE, str(self.percentage))
-            for part in self.parts:
-                p = ET.SubElement(x, XPART)
-                p.text = part
         elif self.type == RestrictionType.GROUP:
-            for group in self.groups:
-                g = ET.SubElement(x, XGROUP)
-                g.text = group
+            if self.groups:
+                x.set(GROUPS, " ".join(self.groups))
         elif self.type == RestrictionType.AGE:
             if self.minage:
                 x.set(MINAGE, str(self.minage))
@@ -377,11 +371,9 @@ class Restriction:
         if self.type == RestrictionType.PARTS:
             if restriction_node.attrib.get(PERCENTAGE):
                 self.percentage = int(restriction_node.attrib.get(PERCENTAGE))
-            for part in restriction_node.iterfind(XPART):
-                self.parts.append(part.text)
         if self.type == RestrictionType.GROUP:
-            for group in restriction_node.iterfind(XGROUP):
-                self.groups.append(group.text)
+            if restriction_node.attrib.get(GROUPS):
+                self.groups = restriction_node.attrib.get(GROUPS).split()
         if self.type == RestrictionType.AGE:
             if restriction_node.attrib.get(MINAGE):
                 self.minage = int(restriction_node.attrib.get(MINAGE))
