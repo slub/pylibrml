@@ -18,6 +18,7 @@ TEMPLATE = "template"
 COPYRIGHT = "copyright"
 
 # XML
+NAMESPACE = "http://librml.org/schema"
 XACTION = "action"
 XRESTRICTION = "restriction"
 XSUBNET = "subnet"

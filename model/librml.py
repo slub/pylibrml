@@ -45,9 +45,12 @@ from model.names import (
     COPYRIGHT,
     RELATEDIDS,
     RELATEDID,
+    NAMESPACE,
 )
 
 logger = logging.getLogger(__name__)
+
+ET.register_namespace("", NAMESPACE)
 
 
 class TypedList(collections.abc.MutableSequence):
@@ -269,7 +272,7 @@ class Restriction:
                 }
 
     def to_xml(self):
-        x = ET.Element(XRESTRICTION, {TYPE: self.type.name.lower()})
+        x = ET.Element(f"{{{NAMESPACE}}}{XRESTRICTION}", {TYPE: self.type.name.lower()})
 
         if self.type == RestrictionType.PARTS:
             if self.percentage:
@@ -288,7 +291,7 @@ class Restriction:
             if self.outside:
                 x.set(OUTSIDE, self.outside)
             for n in self.subnet:
-                xn = ET.SubElement(x, XSUBNET)
+                xn = ET.SubElement(x, f"{{{NAMESPACE}}}{XSUBNET}")
                 xn.text = str(n)
         elif self.type == RestrictionType.DATE:
             if self.todate:
@@ -382,7 +385,7 @@ class Restriction:
         if self.type == RestrictionType.LOCATION:
             self.inside = restriction_node.attrib.get(INSIDE)
             self.outside = restriction_node.attrib.get(OUTSIDE)
-            for subnet in restriction_node.iterfind(XSUBNET):
+            for subnet in restriction_node.iterfind(f"{{*}}{XSUBNET}"):
                 self.subnet.append(subnet.text)
         if self.type == RestrictionType.DATE:
             if restriction_node.attrib.get(FROMDATE):
@@ -453,7 +456,7 @@ class Action:
         return output
 
     def to_xml(self):
-        a = ET.Element(XACTION, {TYPE: self.type.name.lower()})
+        a = ET.Element(f"{{{NAMESPACE}}}{XACTION}", {TYPE: self.type.name.lower()})
         if self.permission:
             a.set(PERMISSION, str(self.permission).lower())
 
@@ -484,7 +487,7 @@ class Action:
     def from_xml(self, action_node):
         if PERMISSION in action_node.attrib:
             self.permission = action_node.attrib.get(PERMISSION) == "true"
-        for restriction_node in action_node.iterfind(XRESTRICTION):
+        for restriction_node in action_node.iterfind(f"{{*}}{XRESTRICTION}"):
             if TYPE in restriction_node.attrib:
                 r = Restriction(
                     RestrictionType.fname(restriction_node.attrib.get(TYPE))
@@ -565,16 +568,16 @@ class LibRML(object):
         return output
 
     def to_xml(self):
-        root = ET.Element(LIBRML)
+        root = ET.Element(f"{{{NAMESPACE}}}{LIBRML}")
         root.set("version", VERSION)
         root.append(ET.Comment(" This XML was created using the libRML Python code "))
-        item = ET.SubElement(root, ITEM)
+        item = ET.SubElement(root, f"{{{NAMESPACE}}}{ITEM}")
 
         if self.id:
             item.set(ID, str(self.id))
         if len(self.relatedids) > 0:
             for rid in self.relatedids:
-                ET.SubElement(item, RELATEDID, {ID: rid})
+                ET.SubElement(item, f"{{{NAMESPACE}}}{RELATEDID}", {ID: rid})
         if self.tenant:
             item.set(TENANT, str(self.tenant))
         if self.usageguide:
