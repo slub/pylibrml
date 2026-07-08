@@ -642,8 +642,8 @@ class LibRML(object):
     def from_xmlstr(xmlstr: str):
         xml_tree = ET.ElementTree(ET.fromstring(xmlstr))
         root = xml_tree.getroot()
-        if root.tag == LIBRML:
-            ie = root.find(ITEM)
+        if root.tag in [LIBRML, f"{{{NAMESPACE}}}{LIBRML}"]:
+            ie = root.find(f"{{*}}{ITEM}")
             if ie is not None and (ID in ie.attrib or TENANT in ie.attrib):
                 librml = LibRML(itemid=ie.attrib.get(ID, ""))
                 librml.tenant = ie.attrib.get(TENANT)
@@ -660,6 +660,7 @@ class LibRML(object):
                 if COMMERCIAL in ie.attrib:
                     librml.commercialuse = ie.attrib.get(COMMERCIAL) == "true"
                 for action_node in ie.iter(XACTION):
+                for action_node in ie.iterfind(f"{{*}}{XACTION}"):
                     if TYPE in action_node.attrib:
                         action = Action(
                             actiontype=ActionType.fname(action_node.attrib.get(TYPE))
