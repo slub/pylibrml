@@ -659,7 +659,9 @@ class LibRML(object):
                     librml.copyright = ie.attrib.get(COPYRIGHT) == "true"
                 if COMMERCIAL in ie.attrib:
                     librml.commercialuse = ie.attrib.get(COMMERCIAL) == "true"
-                for action_node in ie.iter(XACTION):
+                for rid_node in ie.iterfind(f"{{*}}{RELATEDID}"):
+                    if ID in rid_node.attrib:
+                        librml.relatedids.append(rid_node.attrib.get(ID))
                 for action_node in ie.iterfind(f"{{*}}{XACTION}"):
                     if TYPE in action_node.attrib:
                         action = Action(
