@@ -28,7 +28,6 @@ from model.names import (
     AGREEMENTREQ,
     TYPE,
     XRESTRICTION,
-    XSUBNET,
     PERMISSION,
     RESTRICTIONS,
     XACTION,
@@ -152,13 +151,13 @@ class Restriction:
     def __init__(
         self,
         res_type: RestrictionType,
-        subnet: list[str] | None = None,
         groups: list[str] | None = None,
         percentage: int | None = None,
         minage: int | None = None,
         maxage: int | None = None,
         inside: str | None = None,
         outside: str | None = None,
+        subnet: str | None = None,
         fromdate: date | None = None,
         todate: date | None = None,
         maxduration: int | None = None,
@@ -178,13 +177,13 @@ class Restriction:
         else:
             raise TypeError()
 
-        self.subnet = subnet if subnet is not None else []
         self.groups = groups if groups is not None else []
         self.percentage = percentage
         self.minage = minage
         self.maxage = maxage
         self.inside = inside
         self.outside = outside
+        self.subnet = subnet
         self.fromdate = fromdate
         self.todate = todate
         self.maxduration = maxduration
@@ -219,9 +218,9 @@ class Restriction:
                 out[INSIDE] = self.inside
             if self.outside:
                 out[OUTSIDE] = self.outside
-            if len(self.subnet) > 0:
+            if self.subnet:
                 out[SUBNET] = self.subnet
-            if self.inside or self.outside or len(self.subnet) > 0:
+            if self.inside or self.outside or self.subnet:
                 return out
         elif self.type == RestrictionType.DATE:
             out = {TYPE: self.type.name.lower()}
@@ -290,9 +289,8 @@ class Restriction:
                 x.set(INSIDE, self.inside)
             if self.outside:
                 x.set(OUTSIDE, self.outside)
-            for n in self.subnet:
-                xn = ET.SubElement(x, f"{{{NAMESPACE}}}{XSUBNET}")
-                xn.text = str(n)
+            if self.subnet:
+                x.set(SUBNET, self.subnet)
         elif self.type == RestrictionType.DATE:
             if self.todate:
                 x.set(TODATE, str(self.todate))
@@ -385,8 +383,7 @@ class Restriction:
         if self.type == RestrictionType.LOCATION:
             self.inside = restriction_node.attrib.get(INSIDE)
             self.outside = restriction_node.attrib.get(OUTSIDE)
-            for subnet in restriction_node.iterfind(f"{{*}}{XSUBNET}"):
-                self.subnet.append(subnet.text)
+            self.subnet = restriction_node.attrib.get(SUBNET)
         if self.type == RestrictionType.DATE:
             if restriction_node.attrib.get(FROMDATE):
                 self.fromdate = date.fromisoformat(
