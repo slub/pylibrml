@@ -5,8 +5,6 @@ LIBRML = "libRML"
 ITEM = "item"
 ID = "id"
 
-RELATEDIDS = "relatedids"
-RELATEDID = "relatedid"
 ACTIONS = "actions"
 RESTRICTIONS = "restrictions"
 PERMISSION = "permission"

@@ -42,8 +42,6 @@ from model.names import (
     VERSION,
     TEMPLATE,
     COPYRIGHT,
-    RELATEDIDS,
-    RELATEDID,
     NAMESPACE,
 )
 
@@ -518,28 +516,23 @@ class LibRML(object):
     def __init__(
         self,
         itemid: str | None = None,
-        relatedids: list[str] | None = None,
         tenant: str | None = None,
-        usageguide: str | None = None,
-        template: str | None = None,
         copyright: bool = True,
         commercialuse: bool | None = None,
         mention: bool | None = None,
         sharealike: bool | None = None,
+        template: str | None = None,
+        usageguide: str | None = None,
         actions: list[Action] | None = None,
     ):
         self.id = itemid
-        if relatedids is not None:
-            self.relatedids = relatedids
-        else:
-            self.relatedids = []
         self.tenant = tenant
+        self.commercialuse = commercialuse
+        self.copyright = copyright
         self.mention = mention
         self.sharealike = sharealike
-        self.usageguide = usageguide
         self.template = template
-        self.copyright = copyright
-        self.commercialuse = commercialuse
+        self.usageguide = usageguide
         if actions is not None:
             self.actions = actions
         else:
@@ -549,14 +542,8 @@ class LibRML(object):
         output = {}
         if self.id:
             output[ID] = self.id
-        if len(self.relatedids) > 0:
-            output[RELATEDIDS] = self.relatedids
         if self.tenant:
             output[TENANT] = self.tenant
-        if self.usageguide:
-            output[USAGEGUIDE] = self.usageguide
-        if self.template:
-            output[TEMPLATE] = self.template
         if self.copyright is not None:
             output[COPYRIGHT] = self.copyright
         if self.commercialuse is not None:
@@ -565,6 +552,10 @@ class LibRML(object):
             output[MENTION] = self.mention
         if self.sharealike is not None:
             output[SHARE] = self.sharealike
+        if self.template:
+            output[TEMPLATE] = self.template
+        if self.usageguide:
+            output[USAGEGUIDE] = self.usageguide
         if len(self.actions) > 0:
             astring = []
             for action in self.actions:
@@ -580,15 +571,8 @@ class LibRML(object):
 
         if self.id:
             item.set(ID, str(self.id))
-        if len(self.relatedids) > 0:
-            for rid in self.relatedids:
-                ET.SubElement(item, f"{{{NAMESPACE}}}{RELATEDID}", {ID: rid})
         if self.tenant:
             item.set(TENANT, str(self.tenant))
-        if self.usageguide:
-            item.set(USAGEGUIDE, str(self.usageguide))
-        if self.template:
-            item.set(TEMPLATE, str(self.template))
         if self.copyright is not None:
             item.set(COPYRIGHT, str(self.copyright).lower())
         if self.commercialuse is not None:
@@ -597,6 +581,10 @@ class LibRML(object):
             item.set(MENTION, str(self.mention).lower())
         if self.sharealike is not None:
             item.set(SHARE, str(self.sharealike).lower())
+        if self.template:
+            item.set(TEMPLATE, str(self.template))
+        if self.usageguide:
+            item.set(USAGEGUIDE, str(self.usageguide))
         if len(self.actions) > 0:
             for action in self.actions:
                 item.append(action.to_xml())
@@ -620,22 +608,20 @@ class LibRML(object):
             self.id = data[ID]
         else:
             raise LibRMLNotValidError("JSON has no attribute {}!".format(ID))
-        if RELATEDIDS in data:
-            self.relatedids = data[RELATEDIDS]
         if TENANT in data:
             self.tenant = data[TENANT]
         if MENTION in data:
             self.mention = data[MENTION]
         if SHARE in data:
             self.sharealike = data[SHARE]
-        if USAGEGUIDE in data:
-            self.usageguide = data[USAGEGUIDE]
-        if TEMPLATE in data:
-            self.template = data[TEMPLATE]
         if COPYRIGHT in data:
             self.copyright = data[COPYRIGHT]
         if COMMERCIAL in data:
             self.commercialuse = data[COMMERCIAL]
+        if TEMPLATE in data:
+            self.template = data[TEMPLATE]
+        if USAGEGUIDE in data:
+            self.usageguide = data[USAGEGUIDE]
         if ACTIONS in data:
             actions = data[ACTIONS]
             for action in actions:
@@ -649,24 +635,21 @@ class LibRML(object):
         root = xml_tree.getroot()
         if root.tag in [LIBRML, f"{{{NAMESPACE}}}{LIBRML}"]:
             ie = root.find(f"{{*}}{ITEM}")
-            if ie is not None and (ID in ie.attrib or TENANT in ie.attrib):
+            if ie is not None:
                 librml = LibRML(itemid=ie.attrib.get(ID, ""))
                 librml.tenant = ie.attrib.get(TENANT)
                 if MENTION in ie.attrib:
                     librml.mention = ie.attrib.get(MENTION) == "true"
                 if SHARE in ie.attrib:
                     librml.sharealike = ie.attrib.get(SHARE) == "true"
-                if USAGEGUIDE in ie.attrib:
-                    librml.usageguide = ie.attrib.get(USAGEGUIDE)
-                if TEMPLATE in ie.attrib:
-                    librml.template = ie.attrib.get(TEMPLATE)
                 if COPYRIGHT in ie.attrib:
                     librml.copyright = ie.attrib.get(COPYRIGHT) == "true"
                 if COMMERCIAL in ie.attrib:
                     librml.commercialuse = ie.attrib.get(COMMERCIAL) == "true"
-                for rid_node in ie.iterfind(f"{{*}}{RELATEDID}"):
-                    if ID in rid_node.attrib:
-                        librml.relatedids.append(rid_node.attrib.get(ID))
+                if TEMPLATE in ie.attrib:
+                    librml.template = ie.attrib.get(TEMPLATE)
+                if USAGEGUIDE in ie.attrib:
+                    librml.usageguide = ie.attrib.get(USAGEGUIDE)
                 for action_node in ie.iterfind(f"{{*}}{XACTION}"):
                     if TYPE in action_node.attrib:
                         action = Action(
