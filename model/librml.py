@@ -517,7 +517,7 @@ class LibRML(object):
         self,
         itemid: str | None = None,
         tenant: str | None = None,
-        copyright: bool = True,
+        copyright: bool | None = None,
         commercialuse: bool | None = None,
         mention: bool | None = None,
         sharealike: bool | None = None,
