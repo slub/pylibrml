@@ -1,8 +1,7 @@
 import json
 import logging
-import pathlib
+from pathlib import Path
 
-from config import Config
 from jinja2 import FileSystemLoader, meta
 from jinja2.nativetypes import NativeEnvironment
 
@@ -19,10 +18,10 @@ class MetaInformation:
     description = None
     variables = {}
 
-    def __init__(self, template_name: pathlib.Path):
+    def __init__(self, template_name: Path):
         metafilename = template_name.stem + ".meta.json"
         p = template_name.parent
-        metafile = pathlib.Path(p.resolve() / metafilename)
+        metafile = Path(p.resolve() / metafilename)
         if metafile.is_file():
             with metafile.open(encoding="utf-8") as file:
                 self.data = json.load(file)
@@ -79,7 +78,7 @@ class TemplateManager(object):
 
     def __init__(self):
         self.templates = {}
-        T_PATH = Config.TEMPLATE_PATH
+        T_PATH = Path(__file__).parent.parent / "sample-templates"
         env = NativeEnvironment(loader=FileSystemLoader(T_PATH))
         templates = env.list_templates(".jinja")
         for template_name in templates:
@@ -88,7 +87,7 @@ class TemplateManager(object):
                 parsed_content = env.parse(template_source)
                 vars = meta.find_undeclared_variables(parsed_content)
                 logger.info("Template: {}".format(template_name))
-                metainfo = MetaInformation(pathlib.Path(T_PATH / template_name))
+                metainfo = MetaInformation(Path(T_PATH / template_name))
                 variables = []
                 for var in vars:
                     logger.info(".. Variable: {}".format(var))
