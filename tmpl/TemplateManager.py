@@ -111,7 +111,11 @@ class TemplateManager(object):
                 if description is None:
                     description = "No metainfo-file for this template, create one!"
                 self.templates[tid] = dict(
-                    id=tid, templatename=tname, description=description, vars=variables
+                    id=tid,
+                    templatename=tname,
+                    description=description,
+                    vars=variables,
+                    raw_source=template_source,
                 )
             except TemplateNotValidError as error:
                 logger.error(
@@ -132,6 +136,36 @@ class TemplateManager(object):
 
     def getTemplateMeta(self, template):
         return self.templates.get(template)
+
+    def getTemplate(self, templateid):
+        if templateid not in self.templates:
+            return None
+        raw_source = self.templates[templateid].get("raw_source")
+        if not raw_source:
+            return None
+        try:
+            return json.loads(raw_source)
+        except json.JSONDecodeError:
+            from jinja2 import Template
+
+            tmpl = Template(raw_source)
+            vars = meta.find_undeclared_variables(NativeEnvironment().parse(raw_source))
+            dummy_args = {v: [] if v == "groups" else "" for v in vars}
+            filled = tmpl.render(**dummy_args)
+            import re
+
+            filled = re.sub(r",\s*\]", "]", filled)
+            filled = re.sub(r",\s*\}", "}", filled)
+            return json.loads(filled)
+
+    def getFillableRestriction(self, templateid):
+        template = self.templates.get(templateid)
+        if not template:
+            return []
+        return [
+            (var["variable"], var["datatype"], var["description"])
+            for var in template["vars"]
+        ]
 
 
 if __name__ == "__main__":
