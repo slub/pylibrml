@@ -33,6 +33,12 @@ dependencies = [
     "lxml",
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+
 [tool.setuptools]
 packages = ["common", "model", "tmpl"]
 
