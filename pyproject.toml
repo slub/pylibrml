@@ -40,7 +40,7 @@ test = [
 ]
 
 [tool.setuptools]
-packages = ["common", "model", "tmpl"]
+packages = ["model", "tmpl"]
 
 [tool.ruff.lint]
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.

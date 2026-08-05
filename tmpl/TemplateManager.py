@@ -5,7 +5,7 @@ from pathlib import Path
 from jinja2 import FileSystemLoader, meta
 from jinja2.nativetypes import NativeEnvironment
 
-from common.errors import TemplateNotValidError
+from model.exceptions import TemplateNotValidError
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)

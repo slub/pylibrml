@@ -11,7 +11,7 @@ from model.librml import (
     Action,
     LibRML,
 )
-from common.errors import LibRMLNotValidError
+from model.exceptions import LibRMLNotValidError
 
 
 def test_typed_list():

@@ -1,7 +1,7 @@
 import json
 import logging
 
-from common.errors import TemplateNotValidError
+from model.exceptions import TemplateNotValidError
 from model.librml import LibRML
 
 logger = logging.getLogger(__name__)
