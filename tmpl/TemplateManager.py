@@ -1,12 +1,11 @@
 import json
 import logging
-import pathlib
+from pathlib import Path
 
-from config import Config
 from jinja2 import FileSystemLoader, meta
 from jinja2.nativetypes import NativeEnvironment
 
-from common.errors import TemplateNotValidError
+from model.exceptions import TemplateNotValidError
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
@@ -19,10 +18,10 @@ class MetaInformation:
     description = None
     variables = {}
 
-    def __init__(self, template_name: pathlib.Path):
+    def __init__(self, template_name: Path):
         metafilename = template_name.stem + ".meta.json"
         p = template_name.parent
-        metafile = pathlib.Path(p.resolve() / metafilename)
+        metafile = Path(p.resolve() / metafilename)
         if metafile.is_file():
             with metafile.open(encoding="utf-8") as file:
                 self.data = json.load(file)
@@ -79,7 +78,7 @@ class TemplateManager(object):
 
     def __init__(self):
         self.templates = {}
-        T_PATH = Config.TEMPLATE_PATH
+        T_PATH = Path(__file__).parent.parent / "sample-templates"
         env = NativeEnvironment(loader=FileSystemLoader(T_PATH))
         templates = env.list_templates(".jinja")
         for template_name in templates:
@@ -88,7 +87,7 @@ class TemplateManager(object):
                 parsed_content = env.parse(template_source)
                 vars = meta.find_undeclared_variables(parsed_content)
                 logger.info("Template: {}".format(template_name))
-                metainfo = MetaInformation(pathlib.Path(T_PATH / template_name))
+                metainfo = MetaInformation(Path(T_PATH / template_name))
                 variables = []
                 for var in vars:
                     logger.info(".. Variable: {}".format(var))
@@ -111,7 +110,11 @@ class TemplateManager(object):
                 if description is None:
                     description = "No metainfo-file for this template, create one!"
                 self.templates[tid] = dict(
-                    id=tid, templatename=tname, description=description, vars=variables
+                    id=tid,
+                    templatename=tname,
+                    description=description,
+                    vars=variables,
+                    raw_source=template_source,
                 )
             except TemplateNotValidError as error:
                 logger.error(
@@ -132,6 +135,36 @@ class TemplateManager(object):
 
     def getTemplateMeta(self, template):
         return self.templates.get(template)
+
+    def getTemplate(self, templateid):
+        if templateid not in self.templates:
+            return None
+        raw_source = self.templates[templateid].get("raw_source")
+        if not raw_source:
+            return None
+        try:
+            return json.loads(raw_source)
+        except json.JSONDecodeError:
+            from jinja2 import Template
+
+            tmpl = Template(raw_source)
+            vars = meta.find_undeclared_variables(NativeEnvironment().parse(raw_source))
+            dummy_args = {v: [] if v == "groups" else "" for v in vars}
+            filled = tmpl.render(**dummy_args)
+            import re
+
+            filled = re.sub(r",\s*\]", "]", filled)
+            filled = re.sub(r",\s*\}", "}", filled)
+            return json.loads(filled)
+
+    def getFillableRestriction(self, templateid):
+        template = self.templates.get(templateid)
+        if not template:
+            return []
+        return [
+            (var["variable"], var["datatype"], var["description"])
+            for var in template["vars"]
+        ]
 
 
 if __name__ == "__main__":

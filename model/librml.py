@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from datetime import date
 from enum import Enum, unique
 
-from common.errors import LibRMLNotValidError
+from model.exceptions import LibRMLNotValidError
 from model.names import (
     SUBNET,
     GROUPS,
