@@ -6,7 +6,7 @@ LibRML is designed to be low-complexity and tailored for cultural heritage insti
 
 ## Features
 
-- **LibRML v0.5.0 Support**: Fully compliant with the latest LibRML specification.
+- **LibRML v0.6.0 Support**: Fully compliant with the latest LibRML specification.
 - **JSON & XML Support**: Easily convert between Python objects, JSON, and XML.
 - **Header & Actions**: Support for general object properties (copyright, commercial use, etc.) and specific usage actions (read, download, print, etc.).
 - **Restrictions**: Fine-grained control with restrictions like date ranges, age, location, concurrent sessions, quality (resolution, dimension), and more.

@@ -367,7 +367,7 @@ def test_librml_full_workflow():
 
     # XML conversion
     xml_str = librml.to_xml()
-    assert "version=\"0.5.0\"" in xml_str
+    assert "version=\"0.6.0\"" in xml_str
     assert "id=\"id-999\"" in xml_str
     assert "tenant=\"https://test.tenant.org/\"" in xml_str
 
