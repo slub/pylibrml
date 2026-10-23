@@ -73,7 +73,7 @@ def test_action_type_and_restriction_type_enums():
     res_names = RestrictionType.getnames()
     assert "date" in res_names
     assert "quality" in res_names
-    assert len(res_names) == 12
+    assert len(res_names) == 13
 
 
 def test_restriction_various_types():
@@ -168,6 +168,13 @@ def test_restriction_various_types():
     assert d_agree == {"type": "agreement", "required": True}
     x_agree = r_agree.to_xml()
     assert x_agree.attrib.get("required") == "true"
+
+    # RestrictionType.METS
+    r_group = Restriction(RestrictionType.METS, filegroups=["DEFAULT", "DOWNLOAD", "ORIGINAL"])
+    d_group = r_group.to_dict()
+    assert d_group == {"type": "mets", "filegroups": ["DEFAULT", "DOWNLOAD", "ORIGINAL"]}
+    x_group = r_group.to_xml()
+    assert x_group.attrib.get("filegroups") == "DEFAULT DOWNLOAD ORIGINAL"
 
 
 def test_restriction_from_dict_and_xml():

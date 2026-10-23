@@ -43,6 +43,7 @@ from model.names import (
     TEMPLATE,
     COPYRIGHT,
     NAMESPACE,
+    FILEGROUPS,
 )
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ class RestrictionType(Enum):
     COMMERCIALUSE = 10
     QUALITY = 11
     AGREEMENT = 12
+    METS = 13
 
     @classmethod
     def fname(cls, name):
@@ -168,6 +170,7 @@ class Restriction:
         maxbitrate: int | None = None,
         maxdimension: int | None = None,
         agreement_required: bool | None = None,
+        filegroups: list[str] | None = None,
     ):
 
         if res_type in RestrictionType:
@@ -194,6 +197,7 @@ class Restriction:
         self.maxbitrate = maxbitrate
         self.maxdimension = maxdimension
         self.agreement_required = agreement_required
+        self.filegroups = filegroups if filegroups is not None else []
 
     def to_dict(self):
         if self.type == RestrictionType.PARTS:
@@ -268,6 +272,10 @@ class Restriction:
                     TYPE: self.type.name.lower(),
                     AGREEMENTREQ: self.agreement_required,
                 }
+        elif self.type == RestrictionType.METS:
+            if len(self.filegroups) > 0:
+                return {TYPE: self.type.name.lower(), FILEGROUPS: self.filegroups}
+
 
     def to_xml(self):
         x = ET.Element(f"{{{NAMESPACE}}}{XRESTRICTION}", {TYPE: self.type.name.lower()})
@@ -324,6 +332,9 @@ class Restriction:
         elif self.type == RestrictionType.AGREEMENT:
             if self.agreement_required is not None:
                 x.set(AGREEMENTREQ, str(self.agreement_required).lower())
+        elif self.type == RestrictionType.METS:
+            if self.filegroups:
+                x.set(FILEGROUPS, " ".join(self.filegroups))
         else:
             return None
 
@@ -368,6 +379,8 @@ class Restriction:
             self.maxdimension = int(restriction[MAXDIMENSION])
         if AGREEMENTREQ in restriction:
             self.agreement_required = restriction[AGREEMENTREQ]
+        if FILEGROUPS in restriction:
+            self.filegroups = restriction[FILEGROUPS]
 
     def from_xml(self, restriction_node):
         if self.type == RestrictionType.PARTS:
@@ -423,7 +436,9 @@ class Restriction:
             self.agreement_required = (
                 restriction_node.attrib.get(AGREEMENTREQ) == "true"
             )
-
+        if self.type == RestrictionType.METS:
+            if filegroups := restriction_node.attrib.get(FILEGROUPS):
+                self.filegroups = filegroups.split()
 
 class Action:
     def __init__(
