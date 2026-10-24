@@ -1,17 +1,18 @@
 import json
-from datetime import date
-import pytest
 import xml.etree.ElementTree as ET
+from datetime import date
 
-from model.librml import (
-    TypedList,
-    ActionType,
-    RestrictionType,
-    Restriction,
-    Action,
-    LibRML,
-)
+import pytest
+
 from model.exceptions import LibRMLNotValidError
+from model.librml import (
+    Action,
+    ActionType,
+    LibRML,
+    Restriction,
+    RestrictionType,
+    TypedList,
+)
 
 
 def test_typed_list():

@@ -1,4 +1,5 @@
 import pytest
+
 from model.exceptions import (
     LibRMLError,
     LibRMLNotValidError,

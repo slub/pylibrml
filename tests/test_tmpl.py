@@ -1,7 +1,7 @@
 import pytest
-import pathlib
+
 from model.exceptions import TemplateNotValidError
-from tmpl.TemplateManager import TemplateManager, MetaInformation
+from tmpl.TemplateManager import MetaInformation, TemplateManager
 from tmpl.templateutils import from_template
 
 

@@ -3,7 +3,7 @@ from datetime import date
 
 from lxml import etree
 
-from model.librml import LibRML, Action, ActionType, Restriction, RestrictionType
+from model.librml import Action, ActionType, LibRML, Restriction, RestrictionType
 
 if __name__ == "__main__":
     id = "id-123456"
